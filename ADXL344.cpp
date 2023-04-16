@@ -2,11 +2,11 @@
 // Created by corwin on 4/5/2023.
 //
 
-#include "accelerometer.h"
+#include "ADXL344.h"
 
 // TODO: read through this; make sure it makes sense.
 // TODO: More than that, make sure there are no config registers we're missing.
-void Accelerometer::setup () {
+void ADXL344::setup (int8_t X_Offset, int8) {
     Wire.begin(); // Initiate the Wire library
     // Set adxl344 in measuring mode
     Wire.beginTransmission(address); // Start communicating with the device
@@ -38,7 +38,7 @@ void Accelerometer::setup () {
     delay(10);
 }
 // TODO: check the logic here
-void Accelerometer::takeNewMeasurement() {
+void ADXL344::takeNewMeasurement() {
     Wire.beginTransmission(address);
     Wire.write(0x32); // Start with register 0x32 (ACCEL_XOUT_H)
     Wire.endTransmission(false);
@@ -49,7 +49,7 @@ void Accelerometer::takeNewMeasurement() {
     int16 Y_out = ( Wire.read() | Wire.read() << 8); // Y-axis value
     int16 Z_out = ( Wire.read() | Wire.read() << 8); // Z-axis value
 
-    Measurement nextMeasurement(X_out, Y_out, Z_out, measurement.roll, measurement.pitch);
+    //Measurement nextMeasurement(X_out, Y_out, Z_out, , measurement.pitch);
 
 //For a range of +-2g, we need to divide the raw values by 256, according to the datasheet
     X_out = X_out / rangeDivider;
@@ -59,6 +59,6 @@ void Accelerometer::takeNewMeasurement() {
     measurement = nextMeasurement;
 }
 // TODO: Implement range setting function. Default is 2g
-void Accelerometer::setRange() {
+void ADXL344::setRange() {
     return;
 }
