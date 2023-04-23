@@ -32,7 +32,7 @@ enum ADXL344_FIFO_MODE {
 class ADXL344 {
 public :
 	ADXL344();
-    void init() ;
+  	void init() ;
 
 	ADXL344_DATA_RATE configGet_DataRate();
 	int8_t configGet_OffsetX();
@@ -41,24 +41,26 @@ public :
 
 	void configSet_manualCalibration();
 	void configSet_Offsets(int8_t x, int8_t y, int8_t z);
-    void configSet_OffsetX(int8_t x);
-    void configSet_OffsetY(int8_t y);
-    void configSet_OffsetZ(int8_t z);
-	void configSet_DataRate(int4_t freq);
+  	void configSet_OffsetX(int8_t x);
+  	void configSet_OffsetY(int8_t y);
+  	void configSet_OffsetZ(int8_t z);
+	void configSet_DataRate(ADXL344_DATA_RATE);
 	void configSet_FIFOMode(ADXL344_FIFO_MODE);
 	void configSet_2gResolution();
     
-	FilteredMeasurement get() { return measurement; }
+	float X() { return measurement.X(); }
+	float Y() { return measurement.Y(); }
+	float Z() { return measurement.Z(); }
+	float pitch() { return measurement.pitch(); }
+	float roll() { return measurement.roll(); }
+
 	void read();
-    void flushFilter();
-	void zeroOut(int numSamples);
+  	void flushFilter();
 
 private:
     FilteredMeasurement measurement;
     int rangeDivider = 256;
     const int ADDRESS = 0x53; // The adxl344 sensor I^2C address
-
-	
 };
 
 #endif //ADXL344_H

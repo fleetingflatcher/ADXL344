@@ -12,9 +12,9 @@ RawMeasurement::RawMeasurement(int16_t X, int16_t Y, int16_t Z) {
     roll_value = calculateRoll();
 }
 
-
-float RawMeasurement::calculateRoll() { return 0; }
 float RawMeasurement::calculatePitch() {
-    return atan((Y_value/Z_value) * (1 / sqrt(pow(Y_value, 2) + pow(Z_value, 2))));
-	//return atan(-1 * X_out / sqrt(pow(Y_out, 2) + pow(Z_out, 2))) * 180 / M_PI;
+  return -atan2(-X_value, Z_value) * 180 / M_PI;
+}
+float RawMeasurement::calculateRoll() {
+  return atan2(Y_value, Z_value) * 180 / M_PI;
 }

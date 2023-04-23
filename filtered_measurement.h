@@ -12,16 +12,16 @@ public:
 	FilteredMeasurement();
     FilteredMeasurement(RawMeasurement next, FilteredMeasurement prev);
 
-    const int16_t X()       { return X_value; }
-    const int16_t Y()       { return Y_value; }
-    const int16_t Z()       { return Z_value; }
+    const float X()       { return X_value; }
+    const float Y()       { return Y_value; }
+    const float Z()       { return Z_value; }
     const float pitch()   { return pitch_value; }   // Theta
     const float roll()    { return roll_value; }    // Phi
 
 private:
-    int16_t X_value;
-    int16_t Y_value;
-    int16_t Z_value;
+    float X_value;
+    float Y_value;
+    float Z_value;
     float pitch_value;
     float roll_value;
 };

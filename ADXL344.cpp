@@ -17,7 +17,10 @@ void ADXL344::init() {
     Wire.write(0x28);
     Wire.endTransmission();
     delay(10);
-    
+
+    configSet_Offsets(4,4,-6);
+
+    /*
     // Set up activity/inactivity monitoring
     Wire.beginTransmission(ADDRESS);
     Wire.write(0x27);
@@ -41,7 +44,7 @@ void ADXL344::init() {
     Wire.write(0x26);
     Wire.write(0x01);
     Wire.endTransmission();
-
+    */
     // Enable interrupts
     Wire.beginTransmission(ADDRESS);
     Wire.write(0x2E);
@@ -57,42 +60,16 @@ void ADXL344::configSet_manualCalibration() {
 
 void ADXL344::flushFilter() { measurement = FilteredMeasurement(); }
 
-void ADXL344::zeroOut(int numSamples) {
-	//int rate = configGet_DataRate();
-	int rate = 100;
-
-	int x;
-	int y;
-	int z;
-
-	for (int i = 0; i < numSamples; ++i) {
-		read();
-		x -= get().X();
-		y -= get().Y();
-		z -= get().Z();
-		// Delay for 1000/rate, time in ms between samples
-		delay((int) (1000 / (float)rate)); 
-	}
-	x /= numSamples;
-	y /= numSamples;
-	z /= numSamples;
-
-	configSet_Offsets(x, y, z);
-}
 
 void ADXL344::read() {
-    Wire.beginTransmission(ADDRESS);
-    Wire.write(0x32);
-    Wire.endTransmission(false);
-    Wire.requestFrom(ADDRESS, 6, true);
-
-
-    int16_t x = ( Wire.read() | Wire.read() << 8); // X-axis value
-    int16_t y = ( Wire.read() | Wire.read() << 8); // Y-axis value
-    int16_t z = ( Wire.read() | Wire.read() << 8); // Z-axis value
-
-    RawMeasurement raw = RawMeasurement(x, y, z);
-	
+	Wire.beginTransmission(ADDRESS);
+	Wire.write(0x32);
+	Wire.endTransmission(false);
+	Wire.requestFrom(ADDRESS, 6, true);	
+	int16_t x = ( Wire.read() | Wire.read() << 8); // X-axis value
+	int16_t y = ( Wire.read() | Wire.read() << 8); // Y-axis value
+	int16_t z = ( Wire.read() | Wire.read() << 8); // Z-axis value	
+	RawMeasurement raw = RawMeasurement(x, y, z);
 	measurement = FilteredMeasurement(raw, measurement);
 }
 
@@ -112,8 +89,21 @@ void ADXL344::configSet_2gResolution() {
 	delay(5);
 }
 
-void ADXL344::configSet_DataRate(int4_t freq) {
+void ADXL344::configSet_DataRate(ADXL344_DATA_RATE freq) {
+    Wire.beginTransmission(ADDRESS);
+    Wire.write(0x2C);
+    Wire.endTransmission(false);
+    Wire.requestFrom(ADDRESS, 1, true);
 
+    int8_t BW_RATE_REG = Wire.read();
+    BW_RATE_REG &= ~0x0F;
+    BW_RATE_REG |=  freq;
+
+    Wire.beginTransmission(ADDRESS);
+    Wire.write(0x2C);
+    Wire.write(BW_RATE_REG);
+    Wire.endTransmission();
+    delay(5);
 }
 
 void ADXL344::configSet_FIFOMode(ADXL344_FIFO_MODE mode) {
@@ -129,14 +119,17 @@ void ADXL344::configSet_Offsets(int8_t x, int8_t y, int8_t z) {
     Wire.write(0x1E);
     Wire.write(x);
     Wire.endTransmission();
+
 	Wire.beginTransmission(ADDRESS);
     Wire.write(0x1F);
     Wire.write(y);
     Wire.endTransmission();
+
 	Wire.beginTransmission(ADDRESS);
     Wire.write(0x20);
     Wire.write(z);
     Wire.endTransmission();
+
     delay(5);
 }
 
@@ -160,4 +153,28 @@ void ADXL344::configSet_OffsetZ(int8_t offset) {
     Wire.write(offset);
     Wire.endTransmission();
     delay(5);
+}
+int8_t ADXL344::configGet_OffsetX() {
+    Wire.beginTransmission(ADDRESS);
+    Wire.write(0x1E);
+    Wire.endTransmission(false);
+    Wire.requestFrom(ADDRESS, 1, true);
+    int8_t val = Wire.read();
+    return val;
+}
+int8_t ADXL344::configGet_OffsetY() {
+    Wire.beginTransmission(ADDRESS);
+    Wire.write(0x1F);
+    Wire.endTransmission(false);
+    Wire.requestFrom(ADDRESS, 1, true);
+    int8_t val = Wire.read();
+    return val;
+}
+int8_t ADXL344::configGet_OffsetZ() {
+    Wire.beginTransmission(ADDRESS);
+    Wire.write(0x20);
+    Wire.endTransmission(false);
+    Wire.requestFrom(ADDRESS, 1, true);
+    int8_t val = Wire.read();
+    return val;
 }
